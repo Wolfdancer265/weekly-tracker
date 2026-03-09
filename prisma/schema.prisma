@@ -1,0 +1,44 @@
+// This is your Prisma schema file
+datasource db {
+  provider = "postgresql"
+  url      = env("PRISMA_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model WeeklyCheckIn {
+  id        Int     @id @default(autoincrement())
+  weekDate  DateTime @unique
+  
+  // Inner Wolves Goal
+  innerWolvesFocus String?
+  innerWolvesKeyActions String?
+  innerWolvesProgressScore Int?
+  innerWolvesNotes String?
+  
+  // Sapphire Dragon Goal
+  sapphireDragonWritingSessions Int?
+  sapphireDragonCurrentChapter String?
+  sapphireDragonChaptersDrafted Int?
+  sapphireDragonChaptersRevised Int?
+  sapphireDragonShowedUpStatus String?
+  sapphireDragonNotes String?
+  
+  // Physical Vitality Goal
+  physicalVitalityTrainingSessions Int?
+  physicalVitalityNutritionAnchorDays Int?
+  physicalVitalityAverageEnergy Int?
+  physicalVitalityWeight String?
+  physicalVitalityNotes String?
+  
+  // Reflection Questions
+  reflectionInnerWolves String?
+  reflectionManuscript String?
+  reflectionBodyFeel String?
+  reflectionNextWeekAdjustment String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -97,3 +97,4 @@ scripts/
 - No authentication is implemented in v1 (single-user local use).
 - `sapphireDragonShowedUp` is auto-calculated from `writingSessions >= 3`.
 - Weekly date input normalizes to Monday week start.
+# weekly-tracker

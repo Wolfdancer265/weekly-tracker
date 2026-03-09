@@ -1,0 +1,26 @@
+-- CreateTable
+CREATE TABLE "WeeklyCheckIn" (
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "weekDate" TIMESTAMP(3) NOT NULL UNIQUE,
+  "innerWolvesFocus" TEXT,
+  "innerWolvesKeyActions" TEXT,
+  "innerWolvesProgressScore" INTEGER,
+  "innerWolvesNotes" TEXT,
+  "sapphireDragonWritingSessions" INTEGER,
+  "sapphireDragonCurrentChapter" TEXT,
+  "sapphireDragonChaptersDrafted" INTEGER,
+  "sapphireDragonChaptersRevised" INTEGER,
+  "sapphireDragonShowedUpStatus" TEXT,
+  "sapphireDragonNotes" TEXT,
+  "physicalVitalityTrainingSessions" INTEGER,
+  "physicalVitalityNutritionAnchorDays" INTEGER,
+  "physicalVitalityAverageEnergy" INTEGER,
+  "physicalVitalityWeight" TEXT,
+  "physicalVitalityNotes" TEXT,
+  "reflectionInnerWolves" TEXT,
+  "reflectionManuscript" TEXT,
+  "reflectionBodyFeel" TEXT,
+  "reflectionNextWeekAdjustment" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL
+);

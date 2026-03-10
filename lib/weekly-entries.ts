@@ -239,8 +239,9 @@ export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<WeeklyEntr
   return getWeeklyEntryByWeek(weekOf);
 }
 
-export async function fetchAnalyticsEntries(): Promise<WeeklyEntry[]> {
-  return getWeeklyEntriesForAnalytics();
+export async function fetchAnalyticsEntries(): Promise<{ data: WeeklyEntry[] }> {
+  const entries = await getWeeklyEntriesForAnalytics();
+  return { data: entries };
 }
 
 export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<WeeklyEntry> {

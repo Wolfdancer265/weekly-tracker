@@ -271,7 +271,7 @@ export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<{ data
   }
 }
 
-export async function getConfigStatus(): Promise<{ configured: boolean }> {
+export async function getConfigStatus() {
   try {
     const count = await prisma.weeklyCheckIn.count();
     return { configured: count > 0 };

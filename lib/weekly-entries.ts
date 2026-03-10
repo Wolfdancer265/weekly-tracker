@@ -1,10 +1,9 @@
-import { getDbPath } from "@/lib/sqlite/client";
 import {
   getWeeklyEntriesForAnalytics,
   getWeeklyEntryByWeek,
   listWeeklyEntries,
   upsertWeeklyEntry
-} from "@/lib/sqlite/weekly-entries";
+} from "@/lib/prisma/weekly-entries";
 import { normalizeFormData, validateWeeklyEntryFormData } from "@/lib/validation";
 import type { WeeklyEntry, WeeklyEntryFormData } from "@/types";
 
@@ -24,7 +23,7 @@ function toErrorMessage(error: unknown): string {
 export function getConfigStatus(): { configured: boolean; message?: string } {
   return {
     configured: true,
-    message: `Using local SQLite database at ${getDbPath()}.`
+    message: `Using PostgreSQL database via Prisma.`
   };
 }
 

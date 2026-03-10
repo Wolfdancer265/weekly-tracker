@@ -228,3 +228,32 @@ export async function getWeeklyEntriesForAnalytics(): Promise<WeeklyEntry[]> {
     throw error;
   }
 }
+
+// ===== Wrapper functions for backwards compatibility =====
+
+export async function fetchWeeklyEntries(): Promise<WeeklyEntry[]> {
+  return listWeeklyEntries();
+}
+
+export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<WeeklyEntry | null> {
+  return getWeeklyEntryByWeek(weekOf);
+}
+
+export async function fetchAnalyticsEntries(): Promise<WeeklyEntry[]> {
+  return getWeeklyEntriesForAnalytics();
+}
+
+export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<WeeklyEntry> {
+  return upsertWeeklyEntry(data);
+}
+
+export async function getConfigStatus(): Promise<{ configured: boolean }> {
+  // Check if we have any entries in the database
+  try {
+    const count = await prisma.weeklyCheckIn.count();
+    return { configured: count > 0 };
+  } catch (error) {
+    console.error("Error checking config status:", error);
+    return { configured: false };
+  }
+}

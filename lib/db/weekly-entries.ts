@@ -20,7 +20,7 @@ if (process.env.NODE_ENV === "production") {
 
 // Helper function to convert Prisma row to WeeklyEntryDbRow
 function convertPrismaRowToDbRow(row: WeeklyCheckIn): WeeklyEntryDbRow {
-  return {
+  const dbRow: any = {
     id: row.id,
     weekOf: row.weekDate.toISOString().split('T')[0],
     innerWolvesFocus: row.innerWolvesFocus || "",
@@ -42,7 +42,8 @@ function convertPrismaRowToDbRow(row: WeeklyCheckIn): WeeklyEntryDbRow {
     reflectionSapphireDragon: row.reflectionSapphireDragon || "",
     reflectionPhysicalVitality: row.reflectionPhysicalVitality || "",
     reflectionAdjustment: row.reflectionAdjustment || "",
-  } as WeeklyEntryDbRow;
+  };
+  return dbRow as WeeklyEntryDbRow;
 }
 
 export async function listWeeklyEntries(): Promise<WeeklyEntry[]> {

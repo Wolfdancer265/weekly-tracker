@@ -42,8 +42,6 @@ function convertPrismaRowToDbRow(row: any): WeeklyEntryDbRow {
     reflectionSapphireDragon: row.reflectionSapphireDragon,
     reflectionPhysicalVitality: row.reflectionPhysicalVitality,
     reflectionAdjustment: row.reflectionAdjustment,
-    createdAt?: row.createdAt?.toISOString?.(),
-    updatedAt?: row.updatedAt?.toISOString?.(),
   };
 }
 

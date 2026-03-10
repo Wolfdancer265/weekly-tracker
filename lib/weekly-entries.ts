@@ -271,8 +271,7 @@ export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<{ data
   }
 }
 
-// @ts-ignore - Page handles promise correctly at runtime
-export async function getConfigStatus() {
+export async function getConfigStatus(): Promise<any> {
   try {
     const count = await prisma.weeklyCheckIn.count();
     return { configured: count > 0 };

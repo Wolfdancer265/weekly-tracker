@@ -3,7 +3,7 @@ import {
   formatDbRowToWeeklyEntry,
   formatWeeklyEntryToDbPayload,
 } from "@/lib/transformers";
-import type { WeeklyEntry, WeeklyEntryFormData } from "@/types";
+import type { WeeklyEntry, WeeklyEntryFormData, WeeklyEntryDbRow } from "@/types";
 
 let prisma: PrismaClient;
 
@@ -18,18 +18,41 @@ if (process.env.NODE_ENV === "production") {
   prisma = globalForPrisma.prisma;
 }
 
+// Helper function to convert Prisma row to WeeklyEntryDbRow
+function convertPrismaRowToDbRow(row: any): WeeklyEntryDbRow {
+  return {
+    id: row.id,
+    weekOf: row.weekDate.toISOString().split('T')[0],
+    innerWolvesFocus: row.innerWolvesFocus,
+    innerWolvesKeyActions: row.innerWolvesKeyActions,
+    innerWolvesProgressScore: row.innerWolvesProgressScore,
+    innerWolvesNotes: row.innerWolvesNotes,
+    sapphireDragonWritingSessions: row.sapphireDragonWritingSessions,
+    sapphireDragonCurrentChapter: row.sapphireDragonCurrentChapter,
+    sapphireDragonChaptersDrafted: row.sapphireDragonChaptersDrafted,
+    sapphireDragonChaptersRevised: row.sapphireDragonChaptersRevised,
+    sapphireDragonShowedUp: row.sapphireDragonShowedUp,
+    sapphireDragonNotes: row.sapphireDragonNotes,
+    physicalVitalityTrainingSessions: row.physicalVitalityTrainingSessions,
+    physicalVitalityNutritionAnchorDays: row.physicalVitalityNutritionAnchorDays,
+    physicalVitalityAvgEnergy: row.physicalVitalityAvgEnergy,
+    physicalVitalityWeight: row.physicalVitalityWeight || undefined,
+    physicalVitalityNotes: row.physicalVitalityNotes,
+    reflectionInnerWolves: row.reflectionInnerWolves,
+    reflectionSapphireDragon: row.reflectionSapphireDragon,
+    reflectionPhysicalVitality: row.reflectionPhysicalVitality,
+    reflectionAdjustment: row.reflectionAdjustment,
+    createdAt?: row.createdAt?.toISOString?.(),
+    updatedAt?: row.updatedAt?.toISOString?.(),
+  };
+}
+
 export async function listWeeklyEntries(): Promise<WeeklyEntry[]> {
   try {
     const entries = await prisma.weeklyCheckIn.findMany({
       orderBy: { weekDate: "desc" },
     });
-    return entries.map((row: any) => {
-      const dbRow = {
-        ...row,
-        weekOf: row.weekDate.toISOString().split('T')[0], // Convert DateTime to YYYY-MM-DD
-      };
-      return formatDbRowToWeeklyEntry(dbRow);
-    });
+    return entries.map((row) => formatDbRowToWeeklyEntry(convertPrismaRowToDbRow(row)));
   } catch (error) {
     console.error("Error listing weekly entries:", error);
     throw error;
@@ -40,20 +63,13 @@ export async function getWeeklyEntryByWeek(
   weekOf: string
 ): Promise<WeeklyEntry | null> {
   try {
-    // Convert weekOf (YYYY-MM-DD) to the start of that day
     const weekDate = new Date(`${weekOf}T00:00:00Z`);
-    
     const entry = await prisma.weeklyCheckIn.findUnique({
       where: { weekDate },
     });
     
     if (!entry) return null;
-    
-    const dbRow = {
-      ...entry,
-      weekOf: entry.weekDate.toISOString().split('T')[0],
-    };
-    return formatDbRowToWeeklyEntry(dbRow);
+    return formatDbRowToWeeklyEntry(convertPrismaRowToDbRow(entry));
   } catch (error) {
     console.error("Error fetching weekly entry:", error);
     throw error;
@@ -71,33 +87,29 @@ export async function createWeeklyEntry(
       data: {
         weekDate,
         weekOf: data.weekOf,
-        innerWolvesFocus: payload.innerWolvesFocus,
-        innerWolvesKeyActions: payload.innerWolvesKeyActions,
-        innerWolvesProgressScore: payload.innerWolvesProgressScore,
-        innerWolvesNotes: payload.innerWolvesNotes,
-        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions,
-        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter,
-        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted,
-        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised,
-        sapphireDragonShowedUp: payload.sapphireDragonShowedUp,
-        sapphireDragonNotes: payload.sapphireDragonNotes,
-        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions,
-        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays,
-        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy,
-        physicalVitalityWeight: payload.physicalVitalityWeight,
-        physicalVitalityNotes: payload.physicalVitalityNotes,
-        reflectionInnerWolves: payload.reflectionInnerWolves,
-        reflectionSapphireDragon: payload.reflectionSapphireDragon,
-        reflectionPhysicalVitality: payload.reflectionPhysicalVitality,
-        reflectionAdjustment: payload.reflectionAdjustment,
+        innerWolvesFocus: payload.innerWolvesFocus || "",
+        innerWolvesKeyActions: payload.innerWolvesKeyActions || "",
+        innerWolvesProgressScore: payload.innerWolvesProgressScore || 0,
+        innerWolvesNotes: payload.innerWolvesNotes || "",
+        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions || 0,
+        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter || "",
+        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted || 0,
+        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised || 0,
+        sapphireDragonShowedUp: payload.sapphireDragonShowedUp || 0,
+        sapphireDragonNotes: payload.sapphireDragonNotes || "",
+        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions || 0,
+        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays || 0,
+        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy || 0,
+        physicalVitalityWeight: payload.physicalVitalityWeight || null,
+        physicalVitalityNotes: payload.physicalVitalityNotes || "",
+        reflectionInnerWolves: payload.reflectionInnerWolves || "",
+        reflectionSapphireDragon: payload.reflectionSapphireDragon || "",
+        reflectionPhysicalVitality: payload.reflectionPhysicalVitality || "",
+        reflectionAdjustment: payload.reflectionAdjustment || "",
       },
     });
 
-    const dbRow = {
-      ...created,
-      weekOf: created.weekDate.toISOString().split('T')[0],
-    };
-    return formatDbRowToWeeklyEntry(dbRow);
+    return formatDbRowToWeeklyEntry(convertPrismaRowToDbRow(created));
   } catch (error) {
     console.error("Error creating weekly entry:", error);
     throw error;
@@ -115,33 +127,29 @@ export async function updateWeeklyEntry(
     const updated = await prisma.weeklyCheckIn.update({
       where: { weekDate },
       data: {
-        innerWolvesFocus: payload.innerWolvesFocus,
-        innerWolvesKeyActions: payload.innerWolvesKeyActions,
-        innerWolvesProgressScore: payload.innerWolvesProgressScore,
-        innerWolvesNotes: payload.innerWolvesNotes,
-        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions,
-        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter,
-        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted,
-        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised,
-        sapphireDragonShowedUp: payload.sapphireDragonShowedUp,
-        sapphireDragonNotes: payload.sapphireDragonNotes,
-        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions,
-        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays,
-        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy,
-        physicalVitalityWeight: payload.physicalVitalityWeight,
-        physicalVitalityNotes: payload.physicalVitalityNotes,
-        reflectionInnerWolves: payload.reflectionInnerWolves,
-        reflectionSapphireDragon: payload.reflectionSapphireDragon,
-        reflectionPhysicalVitality: payload.reflectionPhysicalVitality,
-        reflectionAdjustment: payload.reflectionAdjustment,
+        innerWolvesFocus: payload.innerWolvesFocus || "",
+        innerWolvesKeyActions: payload.innerWolvesKeyActions || "",
+        innerWolvesProgressScore: payload.innerWolvesProgressScore || 0,
+        innerWolvesNotes: payload.innerWolvesNotes || "",
+        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions || 0,
+        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter || "",
+        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted || 0,
+        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised || 0,
+        sapphireDragonShowedUp: payload.sapphireDragonShowedUp || 0,
+        sapphireDragonNotes: payload.sapphireDragonNotes || "",
+        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions || 0,
+        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays || 0,
+        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy || 0,
+        physicalVitalityWeight: payload.physicalVitalityWeight || null,
+        physicalVitalityNotes: payload.physicalVitalityNotes || "",
+        reflectionInnerWolves: payload.reflectionInnerWolves || "",
+        reflectionSapphireDragon: payload.reflectionSapphireDragon || "",
+        reflectionPhysicalVitality: payload.reflectionPhysicalVitality || "",
+        reflectionAdjustment: payload.reflectionAdjustment || "",
       },
     });
 
-    const dbRow = {
-      ...updated,
-      weekOf: updated.weekDate.toISOString().split('T')[0],
-    };
-    return formatDbRowToWeeklyEntry(dbRow);
+    return formatDbRowToWeeklyEntry(convertPrismaRowToDbRow(updated));
   } catch (error) {
     console.error("Error updating weekly entry:", error);
     throw error;
@@ -160,54 +168,50 @@ export async function upsertWeeklyEntry(
       create: {
         weekDate,
         weekOf: data.weekOf,
-        innerWolvesFocus: payload.innerWolvesFocus,
-        innerWolvesKeyActions: payload.innerWolvesKeyActions,
-        innerWolvesProgressScore: payload.innerWolvesProgressScore,
-        innerWolvesNotes: payload.innerWolvesNotes,
-        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions,
-        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter,
-        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted,
-        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised,
-        sapphireDragonShowedUp: payload.sapphireDragonShowedUp,
-        sapphireDragonNotes: payload.sapphireDragonNotes,
-        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions,
-        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays,
-        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy,
-        physicalVitalityWeight: payload.physicalVitalityWeight,
-        physicalVitalityNotes: payload.physicalVitalityNotes,
-        reflectionInnerWolves: payload.reflectionInnerWolves,
-        reflectionSapphireDragon: payload.reflectionSapphireDragon,
-        reflectionPhysicalVitality: payload.reflectionPhysicalVitality,
-        reflectionAdjustment: payload.reflectionAdjustment,
+        innerWolvesFocus: payload.innerWolvesFocus || "",
+        innerWolvesKeyActions: payload.innerWolvesKeyActions || "",
+        innerWolvesProgressScore: payload.innerWolvesProgressScore || 0,
+        innerWolvesNotes: payload.innerWolvesNotes || "",
+        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions || 0,
+        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter || "",
+        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted || 0,
+        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised || 0,
+        sapphireDragonShowedUp: payload.sapphireDragonShowedUp || 0,
+        sapphireDragonNotes: payload.sapphireDragonNotes || "",
+        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions || 0,
+        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays || 0,
+        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy || 0,
+        physicalVitalityWeight: payload.physicalVitalityWeight || null,
+        physicalVitalityNotes: payload.physicalVitalityNotes || "",
+        reflectionInnerWolves: payload.reflectionInnerWolves || "",
+        reflectionSapphireDragon: payload.reflectionSapphireDragon || "",
+        reflectionPhysicalVitality: payload.reflectionPhysicalVitality || "",
+        reflectionAdjustment: payload.reflectionAdjustment || "",
       },
       update: {
-        innerWolvesFocus: payload.innerWolvesFocus,
-        innerWolvesKeyActions: payload.innerWolvesKeyActions,
-        innerWolvesProgressScore: payload.innerWolvesProgressScore,
-        innerWolvesNotes: payload.innerWolvesNotes,
-        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions,
-        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter,
-        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted,
-        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised,
-        sapphireDragonShowedUp: payload.sapphireDragonShowedUp,
-        sapphireDragonNotes: payload.sapphireDragonNotes,
-        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions,
-        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays,
-        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy,
-        physicalVitalityWeight: payload.physicalVitalityWeight,
-        physicalVitalityNotes: payload.physicalVitalityNotes,
-        reflectionInnerWolves: payload.reflectionInnerWolves,
-        reflectionSapphireDragon: payload.reflectionSapphireDragon,
-        reflectionPhysicalVitality: payload.reflectionPhysicalVitality,
-        reflectionAdjustment: payload.reflectionAdjustment,
+        innerWolvesFocus: payload.innerWolvesFocus || "",
+        innerWolvesKeyActions: payload.innerWolvesKeyActions || "",
+        innerWolvesProgressScore: payload.innerWolvesProgressScore || 0,
+        innerWolvesNotes: payload.innerWolvesNotes || "",
+        sapphireDragonWritingSessions: payload.sapphireDragonWritingSessions || 0,
+        sapphireDragonCurrentChapter: payload.sapphireDragonCurrentChapter || "",
+        sapphireDragonChaptersDrafted: payload.sapphireDragonChaptersDrafted || 0,
+        sapphireDragonChaptersRevised: payload.sapphireDragonChaptersRevised || 0,
+        sapphireDragonShowedUp: payload.sapphireDragonShowedUp || 0,
+        sapphireDragonNotes: payload.sapphireDragonNotes || "",
+        physicalVitalityTrainingSessions: payload.physicalVitalityTrainingSessions || 0,
+        physicalVitalityNutritionAnchorDays: payload.physicalVitalityNutritionAnchorDays || 0,
+        physicalVitalityAvgEnergy: payload.physicalVitalityAvgEnergy || 0,
+        physicalVitalityWeight: payload.physicalVitalityWeight || null,
+        physicalVitalityNotes: payload.physicalVitalityNotes || "",
+        reflectionInnerWolves: payload.reflectionInnerWolves || "",
+        reflectionSapphireDragon: payload.reflectionSapphireDragon || "",
+        reflectionPhysicalVitality: payload.reflectionPhysicalVitality || "",
+        reflectionAdjustment: payload.reflectionAdjustment || "",
       },
     });
 
-    const dbRow = {
-      ...upserted,
-      weekOf: upserted.weekDate.toISOString().split('T')[0],
-    };
-    return formatDbRowToWeeklyEntry(dbRow);
+    return formatDbRowToWeeklyEntry(convertPrismaRowToDbRow(upserted));
   } catch (error) {
     console.error("Error upserting weekly entry:", error);
     throw error;
@@ -219,13 +223,7 @@ export async function getWeeklyEntriesForAnalytics(): Promise<WeeklyEntry[]> {
     const entries = await prisma.weeklyCheckIn.findMany({
       orderBy: { weekDate: "asc" },
     });
-    return entries.map((row: any) => {
-      const dbRow = {
-        ...row,
-        weekOf: row.weekDate.toISOString().split('T')[0],
-      };
-      return formatDbRowToWeeklyEntry(dbRow);
-    });
+    return entries.map((row) => formatDbRowToWeeklyEntry(convertPrismaRowToDbRow(row)));
   } catch (error) {
     console.error("Error fetching analytics entries:", error);
     throw error;

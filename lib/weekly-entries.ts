@@ -3,7 +3,7 @@ import {
   getWeeklyEntryByWeek,
   listWeeklyEntries,
   upsertWeeklyEntry
-} from "@/lib/prisma/weekly-entries";
+} from "@/lib/db/weekly-entries";
 import { normalizeFormData, validateWeeklyEntryFormData } from "@/lib/validation";
 import type { WeeklyEntry, WeeklyEntryFormData } from "@/types";
 

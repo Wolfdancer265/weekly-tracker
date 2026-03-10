@@ -231,21 +231,42 @@ export async function getWeeklyEntriesForAnalytics(): Promise<WeeklyEntry[]> {
 
 // ===== Wrapper functions for backwards compatibility =====
 
-export async function fetchWeeklyEntries(): Promise<WeeklyEntry[]> {
-  return listWeeklyEntries();
+export async function fetchWeeklyEntries(): Promise<{ data: WeeklyEntry[] } | { error: string }> {
+  try {
+    const entries = await listWeeklyEntries();
+    return { data: entries };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error fetching entries";
+    return { error: errorMessage };
+  }
 }
 
-export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<WeeklyEntry | null> {
-  return getWeeklyEntryByWeek(weekOf);
+export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<WeeklyEntry | null | { error: string }> {
+  try {
+    return await getWeeklyEntryByWeek(weekOf);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error fetching entry";
+    return { error: errorMessage } as any;
+  }
 }
 
-export async function fetchAnalyticsEntries(): Promise<{ data: WeeklyEntry[] }> {
-  const entries = await getWeeklyEntriesForAnalytics();
-  return { data: entries };
+export async function fetchAnalyticsEntries(): Promise<{ data: WeeklyEntry[] } | { error: string }> {
+  try {
+    const entries = await getWeeklyEntriesForAnalytics();
+    return { data: entries };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error fetching analytics";
+    return { error: errorMessage };
+  }
 }
 
-export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<WeeklyEntry> {
-  return upsertWeeklyEntry(data);
+export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<WeeklyEntry | { error: string }> {
+  try {
+    return await upsertWeeklyEntry(data);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error saving entry";
+    return { error: errorMessage } as any;
+  }
 }
 
 export async function getConfigStatus(): Promise<{ configured: boolean }> {

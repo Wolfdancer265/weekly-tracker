@@ -231,13 +231,13 @@ export async function getWeeklyEntriesForAnalytics(): Promise<WeeklyEntry[]> {
 
 // ===== Wrapper functions for backwards compatibility =====
 
-export async function fetchWeeklyEntries(): Promise<{ data: WeeklyEntry[] } | { error: string }> {
+export async function fetchWeeklyEntries(): Promise<{ data: WeeklyEntry[] } & { error?: string }> {
   try {
     const entries = await listWeeklyEntries();
     return { data: entries };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error fetching entries";
-    return { error: errorMessage };
+    return { data: [], error: errorMessage };
   }
 }
 
@@ -250,13 +250,13 @@ export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<WeeklyEntr
   }
 }
 
-export async function fetchAnalyticsEntries(): Promise<{ data: WeeklyEntry[] } | { error: string }> {
+export async function fetchAnalyticsEntries(): Promise<{ data: WeeklyEntry[] } & { error?: string }> {
   try {
     const entries = await getWeeklyEntriesForAnalytics();
     return { data: entries };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error fetching analytics";
-    return { error: errorMessage };
+    return { data: [], error: errorMessage };
   }
 }
 

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WeeklyCheckIn } from "@prisma/client";
 import {
   formatDbRowToWeeklyEntry,
   formatWeeklyEntryToDbPayload,
@@ -19,30 +19,30 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Helper function to convert Prisma row to WeeklyEntryDbRow
-function convertPrismaRowToDbRow(row: any): WeeklyEntryDbRow {
+function convertPrismaRowToDbRow(row: WeeklyCheckIn): WeeklyEntryDbRow {
   return {
     id: row.id,
     weekOf: row.weekDate.toISOString().split('T')[0],
-    innerWolvesFocus: row.innerWolvesFocus,
-    innerWolvesKeyActions: row.innerWolvesKeyActions,
-    innerWolvesProgressScore: row.innerWolvesProgressScore,
-    innerWolvesNotes: row.innerWolvesNotes,
-    sapphireDragonWritingSessions: row.sapphireDragonWritingSessions,
-    sapphireDragonCurrentChapter: row.sapphireDragonCurrentChapter,
-    sapphireDragonChaptersDrafted: row.sapphireDragonChaptersDrafted,
-    sapphireDragonChaptersRevised: row.sapphireDragonChaptersRevised,
-    sapphireDragonShowedUp: row.sapphireDragonShowedUp,
-    sapphireDragonNotes: row.sapphireDragonNotes,
-    physicalVitalityTrainingSessions: row.physicalVitalityTrainingSessions,
-    physicalVitalityNutritionAnchorDays: row.physicalVitalityNutritionAnchorDays,
-    physicalVitalityAvgEnergy: row.physicalVitalityAvgEnergy,
+    innerWolvesFocus: row.innerWolvesFocus || "",
+    innerWolvesKeyActions: row.innerWolvesKeyActions || "",
+    innerWolvesProgressScore: row.innerWolvesProgressScore || 0,
+    innerWolvesNotes: row.innerWolvesNotes || "",
+    sapphireDragonWritingSessions: row.sapphireDragonWritingSessions || 0,
+    sapphireDragonCurrentChapter: row.sapphireDragonCurrentChapter || "",
+    sapphireDragonChaptersDrafted: row.sapphireDragonChaptersDrafted || 0,
+    sapphireDragonChaptersRevised: row.sapphireDragonChaptersRevised || 0,
+    sapphireDragonShowedUp: row.sapphireDragonShowedUp || 0,
+    sapphireDragonNotes: row.sapphireDragonNotes || "",
+    physicalVitalityTrainingSessions: row.physicalVitalityTrainingSessions || 0,
+    physicalVitalityNutritionAnchorDays: row.physicalVitalityNutritionAnchorDays || 0,
+    physicalVitalityAvgEnergy: row.physicalVitalityAvgEnergy || 0,
     physicalVitalityWeight: row.physicalVitalityWeight || undefined,
-    physicalVitalityNotes: row.physicalVitalityNotes,
-    reflectionInnerWolves: row.reflectionInnerWolves,
-    reflectionSapphireDragon: row.reflectionSapphireDragon,
-    reflectionPhysicalVitality: row.reflectionPhysicalVitality,
-    reflectionAdjustment: row.reflectionAdjustment,
-  };
+    physicalVitalityNotes: row.physicalVitalityNotes || "",
+    reflectionInnerWolves: row.reflectionInnerWolves || "",
+    reflectionSapphireDragon: row.reflectionSapphireDragon || "",
+    reflectionPhysicalVitality: row.reflectionPhysicalVitality || "",
+    reflectionAdjustment: row.reflectionAdjustment || "",
+  } as WeeklyEntryDbRow;
 }
 
 export async function listWeeklyEntries(): Promise<WeeklyEntry[]> {

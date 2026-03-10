@@ -271,13 +271,13 @@ export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<{ data
   }
 }
 
-export async function getConfigStatus(): Promise<{ configured: boolean }> {
+export function getConfigStatus(): Promise<{ configured: boolean }> {
   // Check if we have any entries in the database
-  try {
-    const count = await prisma.weeklyCheckIn.count();
-    return { configured: count > 0 };
-  } catch (error) {
-    console.error("Error checking config status:", error);
-    return { configured: false };
-  }
+  return prisma.weeklyCheckIn
+    .count()
+    .then((count) => ({ configured: count > 0 }))
+    .catch((error) => {
+      console.error("Error checking config status:", error);
+      return { configured: false };
+    });
 }

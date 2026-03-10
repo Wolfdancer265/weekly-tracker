@@ -261,12 +261,13 @@ export async function fetchAnalyticsEntries(): Promise<{ data: WeeklyEntry[] } &
   }
 }
 
-export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<WeeklyEntry | { error: string }> {
+export async function saveWeeklyEntry(data: WeeklyEntryFormData): Promise<{ data: WeeklyEntry | null } & { error?: string }> {
   try {
-    return await upsertWeeklyEntry(data);
+    const entry = await upsertWeeklyEntry(data);
+    return { data: entry };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error saving entry";
-    return { error: errorMessage } as any;
+    return { data: null, error: errorMessage };
   }
 }
 

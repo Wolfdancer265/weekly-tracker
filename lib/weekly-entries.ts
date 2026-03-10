@@ -241,12 +241,13 @@ export async function fetchWeeklyEntries(): Promise<{ data: WeeklyEntry[] } & { 
   }
 }
 
-export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<WeeklyEntry | null | { error: string }> {
+export async function fetchWeeklyEntryByWeek(weekOf: string): Promise<{ data: WeeklyEntry | null } & { error?: string }> {
   try {
-    return await getWeeklyEntryByWeek(weekOf);
+    const entry = await getWeeklyEntryByWeek(weekOf);
+    return { data: entry };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error fetching entry";
-    return { error: errorMessage } as any;
+    return { data: null, error: errorMessage };
   }
 }
 
